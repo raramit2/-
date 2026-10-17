@@ -5,20 +5,23 @@ app.use(express.json());
 
 // 1. WEBHOOK VERIFICATION (GET route required by Meta)
 app.get('/api/webhook', (req, res) => {
-  const VERIFY_TOKEN = "my_custom_secret_token_123"; // Change this to any secret password you want
+  // Define the verify token directly inside the route so it's guaranteed to work
+  const VERIFY_TOKEN = "hello_whatsapp_123";
 
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  // Check if a token and mode were sent
+  console.log("Incoming verification request from Meta:");
+  console.log("Mode:", mode);
+  console.log("Token received:", token);
+
   if (mode && token) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      // Respond with the challenge token from the request
+      console.log('WEBHOOK_VERIFIED SUCCESSFULLY!');
       return res.status(200).send(challenge);
     } else {
-      // Responds with '403 Forbidden' if verify tokens do not match
+      console.log('Verification failed: Tokens do not match.');
       return res.sendStatus(403);
     }
   }
@@ -32,7 +35,6 @@ app.post('/api/webhook', (req, res) => {
   console.log('--- NEW WHATSAPP WEBHOOK EVENT ---');
   console.log(JSON.stringify(eventData, null, 2));
 
-  // Acknowledge receipt to Meta immediately with a 200 OK
   return res.status(200).json({ status: 'success' });
 });
 
